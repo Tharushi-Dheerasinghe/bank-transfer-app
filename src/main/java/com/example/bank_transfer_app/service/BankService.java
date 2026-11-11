@@ -52,7 +52,19 @@ public class BankService {
             throw new RuntimeException("Simulated system failure after the withdrawal");
         }
 
-        customerRepository.credit(toAccount, amount);
+     
+BigDecimal fee = amount.multiply(new BigDecimal("0.01"));
+BigDecimal totalToDeduct = amount.add(fee);
+
+int updated = customerRepository.debit(fromAccount, totalToDeduct);
+if (updated == 0) {
+    throw new InsufficientBalanceException("Insufficient balance for transfer and 1% fee");
+}
+
+customerRepository.credit(toAccount, amount);
+
+
+customerRepository.credit("999999", fee);
 
         BankTransaction transaction = new BankTransaction();
         transaction.setFromAccount(fromAccount);
@@ -68,6 +80,32 @@ public class BankService {
     @Transactional
     public Customer createCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public BankTransaction deposit(String accountNo, BigDecimal amount) {
+        customerRepository.credit(accountNo, amount);
+        BankTransaction tx = new BankTransaction();
+        tx.setFromAccount("CASH DEPOSIT");
+        tx.setToAccount(accountNo);
+        tx.setAmount(amount);
+        tx.setStatus(TransactionStatus.SUCCESS);
+        tx.setDescription("Cash Deposit");
+        return bankTransactionRepository.save(tx);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public BankTransaction withdraw(String accountNo, BigDecimal amount) {
+        int updated = customerRepository.debit(accountNo, amount);
+        if (updated == 0) {
+            throw new InsufficientBalanceException("Insufficient balance for withdrawal");
+        }
+        BankTransaction tx = new BankTransaction();
+        tx.setFromAccount(accountNo);
+        tx.setToAccount("CASH WITHDRAWAL");
+        tx.setAmount(amount);
+        tx.setStatus(TransactionStatus.SUCCESS);
+        tx.setDescription("Cash Withdrawal");
+        return bankTransactionRepository.save(tx);
     }
 }
 

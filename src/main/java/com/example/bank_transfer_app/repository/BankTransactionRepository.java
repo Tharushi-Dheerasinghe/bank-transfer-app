@@ -2,6 +2,7 @@ package com.example.bank_transfer_app.repository;
 
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,5 +31,11 @@ public interface BankTransactionRepository extends JpaRepository<BankTransaction
     // 4. Number of SUCCESS or FAILED transactions
     @Query("SELECT COUNT(b) FROM BankTransaction b WHERE b.status = :status")
     long countByStatus(@Param("status") TransactionStatus status);
+
+    @Query("SELECT SUM(t.amount) FROM BankTransaction t WHERE t.fromAccount = :account AND t.status = 'SUCCESS'")
+BigDecimal getTotalAmountSent(@Param("account") String account);
+
+@Query("SELECT t FROM BankTransaction t WHERE t.amount > :minAmount")
+    List<BankTransaction> findLargeTransfers(@Param("minAmount") BigDecimal minAmount);
 }
 
