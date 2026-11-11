@@ -73,6 +73,23 @@
                     </form>
                 </div>
             </div>
+
+            <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc;">
+    <h3>Deposit / Withdraw</h3>
+    <!-- Deposit Form -->
+    <form action="/deposit" method="post" style="margin-bottom: 10px;">
+        <input type="text" name="accountNo" placeholder="Account Number" required>
+        <input type="number" name="amount" step="0.01" placeholder="Amount" required>
+        <button type="submit" style="background-color: green; color: white;">Deposit</button>
+    </form>
+    <!-- Withdraw Form -->
+    <form action="/withdraw" method="post">
+        <input type="text" name="accountNo" placeholder="Account Number" required>
+        <input type="number" name="amount" step="0.01" placeholder="Amount" required>
+        <button type="submit" style="background-color: orange; color: white;">Withdraw</button>
+    </form>
+</div>
+
         </div>
 
         <!-- Add Customer Form -->

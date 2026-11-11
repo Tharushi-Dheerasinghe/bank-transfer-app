@@ -14,7 +14,7 @@
         </div>
         <div class="card-body">
             <h5 class="text-end mb-4">Current Balance: <span class="text-success fw-bold" th:text="'Rs. ' + ${customer.balance}"></span></h5>
-            
+            <h4>Total Amount Sent: LKR <span th:text="${totalSent != null ? totalSent : '0.00'}">0.00</span></h4>
             <table class="table table-bordered text-center">
                 <thead class="table-dark">
                     <tr>

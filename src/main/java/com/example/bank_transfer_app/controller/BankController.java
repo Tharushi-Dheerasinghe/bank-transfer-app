@@ -1,6 +1,18 @@
 package com.example.bank_transfer_app.controller;
 
 
+import java.math.BigDecimal;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.example.bank_transfer_app.dto.TransferRequest;
 import com.example.bank_transfer_app.model.Customer;
 import com.example.bank_transfer_app.model.TransactionStatus;
@@ -8,13 +20,9 @@ import com.example.bank_transfer_app.repository.BankTransactionRepository;
 import com.example.bank_transfer_app.repository.CustomerRepository;
 import com.example.bank_transfer_app.service.BankService;
 import com.example.bank_transfer_app.service.TransactionAuditService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequiredArgsConstructor
@@ -95,7 +103,30 @@ public class BankController {
         Customer customer = customerRepository.getByAccountNumber(accountNumber);
         model.addAttribute("customer", customer);
         model.addAttribute("transactions", bankTransactionRepository.findHistory(accountNumber));
+        model.addAttribute("totalSent", bankTransactionRepository.getTotalAmountSent(accountNumber));
         return "history"; 
+        
+    }
+
+    @GetMapping("/large-transfers")
+    public String largeTransfers(@RequestParam(defaultValue = "10000") BigDecimal min, Model model) {
+        model.addAttribute("transactions", bankTransactionRepository.findLargeTransfers(min));
+        model.addAttribute("keyword", "Large Transfers (Min: " + min + ")");
+        return "history";
+    }
+
+    @PostMapping("/deposit")
+    public String depositAccount(@RequestParam String accountNo, @RequestParam BigDecimal amount, RedirectAttributes redirectAttributes) {
+        bankService.deposit(accountNo, amount);
+        redirectAttributes.addFlashAttribute("successMessage", "Deposit Successful!");
+        return "redirect:/";
+    }
+
+    @PostMapping("/withdraw")
+    public String withdrawAccount(@RequestParam String accountNo, @RequestParam BigDecimal amount, RedirectAttributes redirectAttributes) {
+        bankService.withdraw(accountNo, amount);
+        redirectAttributes.addFlashAttribute("successMessage", "Withdrawal Successful!");
+        return "redirect:/";
     }
 }
 
